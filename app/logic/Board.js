@@ -25,6 +25,18 @@ exports.Board = class {
         return this._numberOfWhite;
     }
 
+    canPutAnywhare(color) {
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                if (!this.canNotPut(i, j, color)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     canNotPut(x, y, color) {
         if (this._boardState[x][y].id !== Color.EMPTY.id) {
             return true;
@@ -41,6 +53,11 @@ exports.Board = class {
 
     put(x, y, color) {
         this._boardState[x][y] = color;
+        if (color.id === Color.BLACK) {
+            this._numberOfBlack++;
+        } else {
+            this._numberOfWhite++;
+        }
         this.reverse(x, y, color);
     }
 
@@ -70,10 +87,10 @@ exports.Board = class {
                 continue;
             }
 
-            let x2 = x + DirectionOffsets[key].x;
-            let y2 = y + DirectionOffsets[key].y;
-            while (this._boardState[x2][y2].id === oppositColor.id) {
-                this._boardState[x2][y2] = color;
+            let tempX = x + DirectionOffsets[key].x;
+            let tempY = y + DirectionOffsets[key].y;
+            while (this._boardState[tempX][tempY].id === oppositColor.id) {
+                this._boardState[tempX][tempY] = color;
 
                 if (color === Color.BLACK) {
                     this._numberOfBlack++;
@@ -83,25 +100,13 @@ exports.Board = class {
                     this._numberOfWhite++;
                 }
                 
-                x2 += DirectionOffsets[key].x;
-                y2 += DirectionOffsets[key].y;
+                tempX += DirectionOffsets[key].x;
+                tempY += DirectionOffsets[key].y;
             }
         }
     }
 
     notOutOfBoard(x, y) {
         return (x >= 0 && x <= 7 && y >= 0 && y <= 7);
-    }
-
-    canPutAnywhare(color) {
-        for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-                if (!this.canNotPut(i, j, color)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 };

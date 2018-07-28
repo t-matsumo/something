@@ -5,6 +5,15 @@ exports.ReversiLogic = class {
     constructor() {
         this.board = new Board();
         this._currentTurn = Color.BLACK;
+        this._winner = null;
+    }
+
+    get currentTurn() {
+        return this._currentTurn;
+    }
+
+    get winner() {
+        return this._winner;
     }
 
     start() {
@@ -20,38 +29,33 @@ exports.ReversiLogic = class {
             return this.board.currentState;
         }
 
-        this._currentTurn = (this._currentTurn.id === Color.BLACK.id) ? Color.WHITE : Color.BLACK;
         this.board.put(putInfo.x, putInfo.y, putInfo.color);
+        this._currentTurn = this.nextTurn();
+
+        if (this._currentTurn === null) {
+            if (this.board.numberOfBlack === this.board.numberOfWhite) {
+                this._winner = Color.EMPTY;
+            } else if (this.board.numberOfBlack > this.board.numberOfWhite) {
+                this._winner = Color.BLACK;
+            } else {
+                this._winner = Color.WHITE;
+            }
+        }
 
         return this.board.currentState;
     }
 
-    get currentTurn() {
+    nextTurn() {
+        let next = (this._currentTurn.id === Color.BLACK.id) ? Color.WHITE : Color.BLACK;
+        if (this.board.canPutAnywhare(next)) {
+            return next;
+        }
+
         if (this.board.canPutAnywhare(this._currentTurn)) {
             return this._currentTurn;
         }
 
-        let opponent = (this._currentTurn.id === Color.BLACK.id) ? Color.WHITE : Color.BLACK;
-        if (this.board.canPutAnywhare(opponent)) {
-            this._currentTurn = opponent;
-            return this._currentTurn;
-        }
-        
-        return this._currentTurn;
-    }
-
-    get winner() {
-        if (this.board.canPutAnywhare(Color.BLACK) || this.board.canPutAnywhare(Color.WHITE)) {
-            return null;
-        }
-
-        if (this.board.numberOfBlack === this.board.numberOfWhite) {
-            return Color.EMPTY;
-        } else if (this.board.numberOfBlack > this.board.numberOfWhite) {
-            return Color.BLACK;
-        } else {
-            return Color.WHITE;
-        }
+        // どちらの石も置けない
+        return null;
     }
 };
-
