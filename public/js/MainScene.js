@@ -49,10 +49,17 @@ phina.define('MainScene', {
         this.socket.on('changeBoard', (msg) => {
             let state = JSON.parse(msg);
             this.board.put(state.boadState);
+
+            if (state.winner !== null) {
+                alert(state.winner.id + "の勝ち");
+                this.socket.emit('end');
+                this.exit();
+            }
+
             this.turnLabel.text = state.currentTurn.id + "の番";
             this.currentTurn = state.currentTurn;
         });
 
-        this.socket.emit('start');
+        this.socket.emit('start', this.playerColor);
     },
 });

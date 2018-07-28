@@ -17,20 +17,25 @@ io.on('connection', function (socket) {
     console.log('user disconnected');
   });
 
-  socket.on('start', function(){
+  socket.on('start', function () {
     let firstBoardState = logic.start();
-    let message = JSON.stringify({boadState: firstBoardState, currentTurn: logic.getCurrentTurn});
+    let message = JSON.stringify({ boadState: firstBoardState, currentTurn: logic.currentTurn, winner: logic.winner });
     socket.emit('changeBoard', message);
   });
 
-  socket.on('selectCell', function(msg){
+  socket.on('selectCell', function (msg) {
     let position = JSON.parse(msg);
     let boardState = logic.onSelectCell(position);
-    
-    let message = JSON.stringify({boadState: boardState, currentTurn: logic.getCurrentTurn});
+
+    let message = JSON.stringify({ boadState: boardState, currentTurn: logic.currentTurn, winner: logic.winner });
     io.sockets.emit('changeBoard', message);
   });
+
+  socket.on('end', function () {
+    logic = new ReversiLogic.ReversiLogic();
+  });
 });
+
 http.listen(process.env.PORT || 3000, function () {
   console.log('listening on *:3000');
 });

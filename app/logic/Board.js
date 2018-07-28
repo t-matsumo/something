@@ -3,20 +3,30 @@ let DirectionOffsets = require('../constants/DirectionOffsets').DirectionOffsets
 
 exports.Board = class {
     constructor() {
-        this.boardState = new Array(8);
+        this._boardState = new Array(8);
         for (let y = 0; y < 8; y++) {
-            this.boardState[y] = new Array(8).fill(Color.EMPTY);
+            this._boardState[y] = new Array(8).fill(Color.EMPTY);
         }
-        this.boardState[3][3] = this.boardState[4][4] = Color.WHITE;
-        this.boardState[4][3] = this.boardState[3][4] = Color.BLACK;
+        this._boardState[3][3] = this._boardState[4][4] = Color.WHITE;
+        this._boardState[4][3] = this._boardState[3][4] = Color.BLACK;
+
+        this._numberOfBlack = this._numberOfWhite = 2;
     }
 
-    currentState() {
-        return this.boardState;
+    get currentState() {
+        return this._boardState;
+    }
+
+    get numberOfBlack() {
+        return this._numberOfBlack;
+    }
+
+    get numberOfWhite() {
+        return this._numberOfWhite;
     }
 
     canNotPut(x, y, color) {
-        if (this.boardState[x][y].id !== Color.EMPTY.id) {
+        if (this._boardState[x][y].id !== Color.EMPTY.id) {
             return true;
         }
 
@@ -30,7 +40,7 @@ exports.Board = class {
     }
 
     put(x, y, color) {
-        this.boardState[x][y] = color;
+        this._boardState[x][y] = color;
         this.reverse(x, y, color);
     }
 
@@ -39,14 +49,14 @@ exports.Board = class {
         let count = 0; // 裏返せる個数（これがないと自分の色の石の隣に置けてしまう）
         x += offset.x;
         y += offset.y;
-        while (this.notOutOfBoard(x, y) && this.boardState[x][y].id === oppositColor.id) {
+        while (this.notOutOfBoard(x, y) && this._boardState[x][y].id === oppositColor.id) {
             x += offset.x;
             y += offset.y;
 
             count++;
         }
 
-        if (count > 0 && this.notOutOfBoard(x, y) && this.boardState[x][y].id === color.id) {
+        if (count > 0 && this.notOutOfBoard(x, y) && this._boardState[x][y].id === color.id) {
             return true;
         }
 
@@ -62,8 +72,17 @@ exports.Board = class {
 
             let x2 = x + DirectionOffsets[key].x;
             let y2 = y + DirectionOffsets[key].y;
-            while (this.boardState[x2][y2].id === oppositColor.id) {
-                this.boardState[x2][y2] = color;
+            while (this._boardState[x2][y2].id === oppositColor.id) {
+                this._boardState[x2][y2] = color;
+
+                if (color === Color.BLACK) {
+                    this._numberOfBlack++;
+                    this._numberOfWhite--;
+                } else {
+                    this._numberOfBlack--;
+                    this._numberOfWhite++;
+                }
+                
                 x2 += DirectionOffsets[key].x;
                 y2 += DirectionOffsets[key].y;
             }
@@ -72,5 +91,17 @@ exports.Board = class {
 
     notOutOfBoard(x, y) {
         return (x >= 0 && x <= 7 && y >= 0 && y <= 7);
+    }
+
+    canPutAnywhare(color) {
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                if (!this.canNotPut(i, j, color)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 };
