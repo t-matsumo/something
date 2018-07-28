@@ -1,4 +1,4 @@
-exports.DirectionOffsets = {
+export default {
     UP: {x: 0, y: -1},
     UP_RIGHT:{x: 1, y: -1},
     RIGHT: {x: 1, y: 0},
