@@ -6,11 +6,12 @@ export default class {
      * 石を置く座標を1つ返す
      * 座標の形式：{x: 整数, y: 整数}
      * x, yの範囲：左上が原点(0, 0)、右下が(7, 7)
+     * @param {Array} boadState - 盤面の状態
      * @param {Array} puttableIndices - 石を置ける座標の配列（必ず要素数は1以上）
      * @param {Color} playerColor - プレイヤーの色(置くべき石の色)
      * @return {Object} 座標を{x: 整数, y: 整数}の形式で返す
      */
-    think(puttableIndices, playerColor) {
+    think(boadState, puttableIndices, playerColor) {
         return puttableIndices[0];
     }
 
