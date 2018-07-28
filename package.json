@@ -1,0 +1,9 @@
+{
+    "name": "reversi",
+    "version": "0.0.1",
+    "description": "",
+    "dependencies": {
+        "express": "^4.16.3",
+        "socket.io": "^2.1.1"
+    }
+}
