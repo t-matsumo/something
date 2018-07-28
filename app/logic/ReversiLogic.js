@@ -21,7 +21,7 @@ exports.ReversiLogic = class {
     }
 
     onSelectCell(putInfo) {
-        if (putInfo.color.id !== this._currentTurn.id) {
+        if (this._currentTurn == null || putInfo.color.id !== this._currentTurn.id) {
             return this.board.currentState;
         }
 

@@ -68,7 +68,9 @@ phina.define('MainScene', {
             if (state.winner !== null) {
                 alert(state.winner.id + "の勝ち");
                 this.socket.emit('end');
+                this.socket.disconnect();
                 this.exit();
+                return;
             }
 
             this.turnLabel.text = state.currentTurn.id + "の番";
