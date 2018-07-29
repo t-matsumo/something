@@ -48,7 +48,7 @@ phina.define('MainScene', {
         this.autoButton = Button({
             x: this.gridX.center(-6),
             y: this.gridY.center(6),
-            text: '自動でやる1'
+            text: '自動でやる1(弱い？)'
         }).on('push', (e) => {
             this.autoClient = new AutoClient();
             this.autoMode = !this.autoMode;
@@ -59,7 +59,7 @@ phina.define('MainScene', {
         this.autoButton2 = Button({
             x: this.gridX.center(6),
             y: this.gridY.center(6),
-            text: '自動でやる2'
+            text: '自動でやる2(強い？)'
         }).on('push', (e) => {
             this.autoClient = new AutoClient2();
             this.autoMode = !this.autoMode;
@@ -99,9 +99,11 @@ phina.define('MainScene', {
             this.currentTurn = state.currentTurn;
 
             if (this.autoMode && this.currentTurn.id === this.playerColor.id) {
-                let msg = this.autoClient.put(state.boadState, this.playerColor);
-                let putInfo = JSON.stringify({ x: msg.x, y: msg.y, color: this.playerColor });
-                this.socket.emit('selectCell', this.socket.id, putInfo);
+                setTimeout(() => {
+                    let msg = this.autoClient.put(state.boadState, this.playerColor);
+                    let putInfo = JSON.stringify({ x: msg.x, y: msg.y, color: this.playerColor });
+                    this.socket.emit('selectCell', this.socket.id, putInfo);
+                }, 300);
             }
         });
 

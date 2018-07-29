@@ -127,6 +127,6 @@ export default class {
             }
         }
 
-        return {numOfBlack: numOfBlack, numberOfWhite: numOfWhite};
+        return {numOfBlack: numOfBlack, numOfWhite: numOfWhite};
     }
 }

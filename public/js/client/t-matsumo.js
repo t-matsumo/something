@@ -17,7 +17,7 @@ export default class extends clientTemplate {
      */
     think(info) {
         this.playerColor = info.playerColor;
-        this.maxDepth = 2;
+        this.maxDepth = 3;
 
         // 評価値が最も高い座標を選択
         let maxValue = this.calcValue(info.boadState, info.puttableIndices[0].x, info.puttableIndices[0].y, info.playerColor);
@@ -34,19 +34,21 @@ export default class extends clientTemplate {
     }
 
     calcValueWithNextTurn(boadState, x, y, color, depth) {
-        console.log((this.maxDepth - depth + 1) + "手先を計算中");
+        // console.log((this.maxDepth - depth + 1) + "手先を計算中");
 
-        let value = this.calcValue(boadState, x, y, color);
+        let nextBoard = this.putToBoard(boadState, x, y, color);
+
+        let value = this.calcValue(nextBoard, color);
+
         if (depth <= 0) {
             return value;
         }
 
-        let nextBoard = this.putToBoard(boadState, x, y, color);
-
         let nextColor = (color.id === Color.BLACK.id) ? Color.WHITE : Color.BLACK;
-        let nextCells = this.searchPuttableCellIndices(boadState, nextColor);
+        let nextCells = this.searchPuttableCellIndices(nextBoard, nextColor);
         if (nextCells.length <= 0) {
-            nextCells = this.searchPuttableCellIndices(boadState, color.id);
+            nextCells = this.searchPuttableCellIndices(nextBoard, color.id);
+            nextColor = color.id;
         }
 
         if (nextCells.length <= 0) {
@@ -71,14 +73,38 @@ export default class extends clientTemplate {
     }
 
     // 評価関数
-    calcValue(boadState, x, y, color) {
-        let board = this.putToBoard(boadState, x, y, color);
-        let nums = this.count(board);
+    calcValue(boadState, color) {
+        let nums = this.count(boadState);
+        let cornerValue = 0;
+
+        if (boadState[0][0].id === Color.id) {
+            cornerValue++;
+        }
+
+        if (boadState[0][7].id === Color.id) {
+            cornerValue++;
+        }
+
+        if (boadState[7][0].id === Color.id) {
+            cornerValue++;
+        }
+
+        if (boadState[7][7].id === Color.id) {
+            cornerValue++;
+        }
+
+        let nextTurnValue = 0;
+        let nextCells = this.searchPuttableCellIndices(boadState, color);
+        if (color.id !== this.playerColor.id) {
+            if (nextCells.length <= 0) {
+                nextTurnValue = 1;
+            }
+        }
 
         if (color.id === Color.BLACK.id) {
-            return nums.numOfBlack - nums.numberOfWhite;
+            return cornerValue * 40 + nextTurnValue * 50 + (nums.numOfBlack - nums.numOfWhite) * 10 + nextCells.length * 20;
         } else {
-            return nums.numberOfWhite - nums.numOfBlack;
+            return cornerValue * 40 + nextTurnValue * 50 + (nums.numOfWhite - nums.numOfBlack) * 10 + nextCells.length * 20;
         }
     }
 
