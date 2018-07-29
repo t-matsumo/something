@@ -20,7 +20,7 @@ io.on('connection', function (socket) {
   socket.on('start', function (id, playerColor) {
     rooms.register(id, playerColor);
 
-    let timer = setInterval(function() {
+    let timer = setInterval(function () {
       if (rooms.matched(id)) {
         clearInterval(timer);
 
@@ -28,7 +28,7 @@ io.on('connection', function (socket) {
         socket.join(room.roomId);
 
         let firstBoardState = room.logic.start();
-        let message = JSON.stringify({ boadState: firstBoardState, currentTurn: room.logic.currentTurn, winner: room.logic.winner, roomId: room.roomId });
+        let message = JSON.stringify({ boadState: firstBoardState, currentTurn: room.logic.currentTurn, winner: room.logic.winner, roomId: room.roomId, numOfBlack: room.logic.numOfBlack, numOfWhite: room.logic.numOfWhite });
         io.to(id).emit('start', message);
       }
     }, 5000);
@@ -40,7 +40,7 @@ io.on('connection', function (socket) {
     let position = JSON.parse(msg);
     let boardState = room.logic.onSelectCell(position);
 
-    let message = JSON.stringify({ boadState: boardState, currentTurn: room.logic.currentTurn, winner: room.logic.winner, roomId: room.roomId });
+    let message = JSON.stringify({ boadState: boardState, currentTurn: room.logic.currentTurn, winner: room.logic.winner, roomId: room.roomId, numOfBlack: room.logic.numOfBlack, numOfWhite: room.logic.numOfWhite });
     io.to(room.roomId).emit('changeBoard', message);
   });
 

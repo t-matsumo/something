@@ -16,6 +16,14 @@ exports.ReversiLogic = class {
         return this._winner;
     }
 
+    get numOfBlack() {
+        return this.board.numberOfBlack;
+    }
+
+    get numOfWhite() {
+        return this.board.numberOfWhite;
+    }
+
     start() {
         return this.board.currentState;
     }

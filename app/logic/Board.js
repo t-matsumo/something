@@ -53,7 +53,7 @@ exports.Board = class {
 
     put(x, y, color) {
         this._boardState[x][y] = color;
-        if (color.id === Color.BLACK) {
+        if (color.id === Color.BLACK.id) {
             this._numberOfBlack++;
         } else {
             this._numberOfWhite++;
@@ -92,7 +92,7 @@ exports.Board = class {
             while (this._boardState[tempX][tempY].id === oppositColor.id) {
                 this._boardState[tempX][tempY] = color;
 
-                if (color === Color.BLACK) {
+                if (color.id === Color.BLACK.id) {
                     this._numberOfBlack++;
                     this._numberOfWhite--;
                 } else {

@@ -1,7 +1,7 @@
 import CoordinateConverter from './util/CoordinateConverter.js';
 import Color from './constants/Color.js';
-import AutoClient from './client/client.js';
-import AutoClient2 from './client/client1.js';
+import AutoClient from './client/client1.js';
+import AutoClient2 from './client/t-matsumo.js';
 
 phina.define('MainScene', {
     superClass: 'DisplayScene',
@@ -55,7 +55,7 @@ phina.define('MainScene', {
             this.autoButton.text = this.autoMode ? '自分でやる' : '自動でやる';
         })
             .addChildTo(this);
-        
+
         this.autoButton2 = Button({
             x: this.gridX.center(6),
             y: this.gridY.center(6),
@@ -86,10 +86,12 @@ phina.define('MainScene', {
             this.board.put(state.boadState);
 
             if (state.winner !== null) {
-                alert(state.winner.id + "の勝ち");
-                this.socket.emit('end', this.socket.id);
-                this.socket.disconnect();
-                this.exit();
+                setTimeout(() => {
+                    alert(state.winner.id + "の勝ち(黒:" + state.numOfBlack + "、白:" + state.numOfWhite + ")");
+                    this.socket.emit('end', this.socket.id);
+                    this.socket.disconnect();
+                    this.exit();
+                }, 3000);
                 return;
             }
 
