@@ -11,11 +11,19 @@ phina.define('MainScene', {
     autoMode: false,
     autoButton: null,
     autoClient: null,
+    roomIdLabel: null,
 
     init: function (options) {
         this.superInit();
 
         this.autoClient = new AutoClient();
+
+        this.roomIdLabel = Label({
+            x: this.gridX.center(),
+            y: this.gridY.center(7),
+            text: "ルームID:" + '未定',
+        }).addChildTo(this);
+
         this.playerColor = options.playerColor;
         Label({
             x: this.gridX.center(-6),
@@ -58,7 +66,7 @@ phina.define('MainScene', {
                 let x = CoordinateConverter.coordinateToIndexX(this.board, e.pointer.x);
                 let y = CoordinateConverter.coordinateToIndexY(this.board, e.pointer.y);
                 let putInfo = JSON.stringify({ x: x, y: y, color: this.playerColor })
-                this.socket.emit('selectCell', putInfo);
+                this.socket.emit('selectCell', this.socket.id, putInfo);
             });
 
         this.socket.on('changeBoard', (msg) => {
@@ -67,7 +75,7 @@ phina.define('MainScene', {
 
             if (state.winner !== null) {
                 alert(state.winner.id + "の勝ち");
-                this.socket.emit('end');
+                this.socket.emit('end', this.socket.id);
                 this.socket.disconnect();
                 this.exit();
                 return;
@@ -77,13 +85,31 @@ phina.define('MainScene', {
             this.currentTurn = state.currentTurn;
 
             if (this.autoMode && this.currentTurn.id === this.playerColor.id) {
-                console.log("auto");
                 let msg = this.autoClient.put(state.boadState, this.playerColor);
-                let putInfo = JSON.stringify({ x: msg.x, y: msg.y, color: this.playerColor })
-                this.socket.emit('selectCell', putInfo);
+                let putInfo = JSON.stringify({ x: msg.x, y: msg.y, color: this.playerColor });
+                this.socket.emit('selectCell', this.socket.id, putInfo);
             }
         });
 
-        this.socket.emit('start', this.playerColor);
+        this.socket.on('start', (msg) => {
+            let state = JSON.parse(msg);
+
+            this.roomIdLabel.text = "ルームID" + state.roomId;
+
+            this.board.put(state.boadState);
+
+            this.turnLabel.text = state.currentTurn.id + "の番";
+            this.currentTurn = state.currentTurn;
+
+            if (this.autoMode && this.currentTurn.id === this.playerColor.id) {
+                let msg = this.autoClient.put(state.boadState, this.playerColor);
+                let putInfo = JSON.stringify({ x: msg.x, y: msg.y, color: this.playerColor })
+                this.socket.emit('selectCell', this.socket.id, putInfo);
+            }
+        });
+
+        this.socket.on('connect', () => {
+            this.socket.emit('start', this.socket.id, this.playerColor);
+        });
     },
 });

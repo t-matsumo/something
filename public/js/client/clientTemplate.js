@@ -17,7 +17,7 @@ export default class {
 
     put(boadState, playerColor) {
         let puttableIndices = this.searchPuttableCellIndices(boadState, playerColor);
-        return this.think(puttableIndices, playerColor);
+        return this.think(boadState, puttableIndices, playerColor);
     }
 
     searchPuttableCellIndices(boadState, playerColor) {
