@@ -1,6 +1,7 @@
 import CoordinateConverter from './util/CoordinateConverter.js';
 import Color from './constants/Color.js';
 import AutoClient from './client/client.js';
+import AutoClient2 from './client/client1.js';
 
 phina.define('MainScene', {
     superClass: 'DisplayScene',
@@ -10,13 +11,12 @@ phina.define('MainScene', {
     turnLabel: null,
     autoMode: false,
     autoButton: null,
+    autoButton2: null,
     autoClient: null,
     roomIdLabel: null,
 
     init: function (options) {
         this.superInit();
-
-        this.autoClient = new AutoClient();
 
         this.roomIdLabel = Label({
             x: this.gridX.center(),
@@ -46,12 +46,24 @@ phina.define('MainScene', {
         }).addChildTo(this);
 
         this.autoButton = Button({
-            x: this.gridX.center(),
+            x: this.gridX.center(-6),
             y: this.gridY.center(6),
-            text: '自動でやる'
+            text: '自動でやる1'
         }).on('push', (e) => {
+            this.autoClient = new AutoClient();
             this.autoMode = !this.autoMode;
             this.autoButton.text = this.autoMode ? '自分でやる' : '自動でやる';
+        })
+            .addChildTo(this);
+        
+        this.autoButton2 = Button({
+            x: this.gridX.center(6),
+            y: this.gridY.center(6),
+            text: '自動でやる2'
+        }).on('push', (e) => {
+            this.autoClient = new AutoClient2();
+            this.autoMode = !this.autoMode;
+            this.autoButton2.text = this.autoMode ? '自分でやる' : '自動でやる';
         })
             .addChildTo(this);
 

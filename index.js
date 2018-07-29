@@ -2,7 +2,6 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var ReversiLogic = require('./app/logic/ReversiLogic');
 var Rooms = require('./app/Room/Rooms').Rooms;
 var rooms = new Rooms();
 
