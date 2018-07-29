@@ -26,14 +26,14 @@ phina.define('MainScene', {
 
         this.playerColor = options.playerColor;
         Label({
-            x: this.gridX.center(-6),
+            x: this.gridX.center(-4),
             y: this.gridY.center(-6),
             text: "あなたの色：" + this.playerColor.id,
         }).addChildTo(this);
 
         this.currentTurn = Color.BLACK;
         this.turnLabel = Label({
-            x: this.gridX.center(6),
+            x: this.gridX.center(4),
             y: this.gridY.center(-6),
             text: this.currentTurn.id + "の番",
         }).addChildTo(this);
@@ -46,9 +46,10 @@ phina.define('MainScene', {
         }).addChildTo(this);
 
         this.autoButton = Button({
-            x: this.gridX.center(-6),
+            x: this.gridX.center(-4),
             y: this.gridY.center(6),
-            text: '自動でやる1(弱い？)'
+            width: 300,
+            text: '自動1(弱い？)'
         }).on('push', (e) => {
             this.autoClient = new AutoClient();
             this.autoMode = !this.autoMode;
@@ -57,13 +58,14 @@ phina.define('MainScene', {
             .addChildTo(this);
 
         this.autoButton2 = Button({
-            x: this.gridX.center(6),
+            x: this.gridX.center(4),
             y: this.gridY.center(6),
-            text: '自動でやる2(強い？)'
+            width: 300,
+            text: '自動2(強い？)'
         }).on('push', (e) => {
             this.autoClient = new AutoClient2();
             this.autoMode = !this.autoMode;
-            this.autoButton2.text = this.autoMode ? '自分でやる' : '自動でやる';
+            this.autoButton2.text = this.autoMode ? '手動' : '自動';
         })
             .addChildTo(this);
 
