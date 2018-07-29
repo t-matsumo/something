@@ -8,20 +8,14 @@ export default class extends clientTemplate {
      * 座標の形式：{x: 整数, y: 整数}
      * x, yの範囲：左上が原点(0, 0)、右下が(7, 7)
      * info = {
-            boadState: boadState,
-            puttableIndices: puttableIndices,
-            playerColor: playerColor,
-            numOfBlack: numOfBlack,
-            numOfWhite: numOfWhite
+            boadState: boadState, // 盤面の状態Colorの配列
+            puttableIndices: puttableIndices, // 石を置くことができる座標の配列
+            playerColor: playerColor, // 置くべき石の色 Color
+            numOfBlack: numOfBlack, // 黒石の数
+            numOfWhite: numOfWhite // 白石の数
         };
      */
     think(info) {
-        console.dir(this.count(info.boadState));
-        let board = this.putToBoard(info.boadState, info.puttableIndices[0].x, info.puttableIndices[0].y, info.playerColor);
-        console.dir(board);
-        console.dir(info.boadState);
-        console.dir(this.count(board));
-        console.dir(this.count(info.boadState));
         return super.think(info);
     }
 
