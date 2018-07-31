@@ -40,8 +40,6 @@ export default class {
             numOfWhite: count.numOfWhite
         };
 
-        console.dir(info);
-        alert();
         return this.think(info);
     }
 
@@ -109,7 +107,10 @@ export default class {
     putToBoard(currentBoardState, x, y, playerColor) {
         let boardState = new Array(8);
         for (let x = 0; x < 8; x++) {
-            boardState[x] = currentBoardState[x].slice();
+            boardState[x] = new Array(8);
+            for (let y = 0; y < 8; y++) {
+                boardState[x][y] = currentBoardState[x][y];
+            }
         }
 
         boardState[x][y] = playerColor;
@@ -153,6 +154,7 @@ export default class {
     count(boardState) {
         let numOfBlack = 0;
         let numOfWhite = 0;
+
         for (let x = 0; x < 8; x++) {
             for (let y = 0; y < 8; y++) {
                 switch (boardState[x][y]) {

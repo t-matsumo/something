@@ -1,4 +1,4 @@
-import Color from '../constants/Color.js';
+import Color from './constants/Color.js';
 import DirectionOffsets from './constants/DirectionOffsets.js';
 import clientTemplate from './clientTemplate.js';
 
@@ -17,13 +17,15 @@ export default class extends clientTemplate {
      */
     think(info) {
         this.playerColor = info.playerColor;
-        this.maxDepth = 3;
+        this.opponentColor = (this.playerColor === Color.BLACK) ? Color.WHITE : Color.BLACK;
+
 
         // 評価値が最も高い座標を選択
-        let maxValue = this.calcValue(info.boadState, info.puttableIndices[0].x, info.puttableIndices[0].y, info.playerColor);
+        let maxDepth = 5;
+        let maxValue = 0;
         let selectedCell = info.puttableIndices[0];
         for (let cell of info.puttableIndices) {
-            let tmp = this.calcValueWithNextTurn(info.boadState, cell.x, cell.y, info.playerColor, this.maxDepth);
+            let tmp = this.calcValue(info.boadState, cell.x, cell.y, info.playerColor, maxDepth);
             if (maxValue < tmp) {
                 maxValue = tmp;
                 selectedCell = cell;
@@ -33,79 +35,67 @@ export default class extends clientTemplate {
         return selectedCell;
     }
 
-    calcValueWithNextTurn(boadState, x, y, color, depth) {
-        // console.log((this.maxDepth - depth + 1) + "手先を計算中");
-
-        let nextBoard = this.putToBoard(boadState, x, y, color);
-
-        let value = this.calcValue(nextBoard, color);
-
-        if (depth <= 0) {
-            return value;
+    // 評価関数
+    calcValue(boadState, x, y, color, depth) {
+        if (depth < 1) {
+            return 0;
         }
 
-        let nextColor = (color.id === Color.BLACK.id) ? Color.WHITE : Color.BLACK;
-        let nextCells = this.searchPuttableCellIndices(nextBoard, nextColor);
-        if (nextCells.length <= 0) {
-            nextCells = this.searchPuttableCellIndices(nextBoard, color.id);
-            nextColor = color.id;
-        }
+        let nextState = this.putToBoard(boadState, x, y, color);
+        let count = this.count(nextState.boardState);
 
-        if (nextCells.length <= 0) {
-            return value;
-        }
+        let value = this.evaluateBoardState(boadState, count, color);
 
-        let maxValue = 0;
-        for (let cell of nextCells) {
-            let tmp = 0;
-            if (this.playerColor.id === color.id) {
-                tmp = this.calcValueWithNextTurn(nextBoard, cell.x, cell.y, nextColor, depth - 1) + value;
-            } else {
-                tmp = this.calcValueWithNextTurn(nextBoard, cell.x, cell.y, nextColor, depth - 1) - value;
+        let puttableIndices = this.searchPuttableCellIndices(nextState.boardState, nextState.nextColor);
+        if (nextState.nextColor === this.playerColor) {
+            let maxValue = 0;
+            for (let cell of puttableIndices) {
+                let tmp = this.calcValue(nextState.boardState, cell.x, cell.y, nextState.nextColor, depth - 1);
+                if (maxValue < tmp) {
+                    maxValue = tmp;
+                }
             }
-
-            if (maxValue < tmp) {
-                maxValue = tmp;
+            return value + maxValue;
+        } else if (nextState.nextColor === this.opponentColor) {
+            let minValue = 0;
+            for (let cell of puttableIndices) {
+                let tmp = this.calcValue(nextState.boardState, cell.x, cell.y, nextState.nextColor, depth - 1);
+                if (minValue > tmp) {
+                    minValue = tmp;
+                }
             }
+            return value + minValue;
         }
 
-        return maxValue;
+        // nullのとき（終了）
+        return value;
     }
 
-    // 評価関数
-    calcValue(boadState, color) {
-        let nums = this.count(boadState);
-        let cornerValue = 0;
-
-        if (boadState[0][0].id === Color.id) {
-            cornerValue++;
-        }
-
-        if (boadState[0][7].id === Color.id) {
-            cornerValue++;
-        }
-
-        if (boadState[7][0].id === Color.id) {
-            cornerValue++;
-        }
-
-        if (boadState[7][7].id === Color.id) {
-            cornerValue++;
-        }
-
-        let nextTurnValue = 0;
-        let nextCells = this.searchPuttableCellIndices(boadState, color);
-        if (color.id !== this.playerColor.id) {
-            if (nextCells.length <= 0) {
-                nextTurnValue = 1;
-            }
-        }
-
-        if (color.id === Color.BLACK.id) {
-            return cornerValue * 40 + nextTurnValue * 50 + (nums.numOfBlack - nums.numOfWhite) * 10 + nextCells.length * 20;
+    evaluateBoardState(boadState, count, color) {
+        let cornerValue = this.calcCornerValue(boadState, color);
+        if (color === Color.BLACK) {
+            return cornerValue * 100 + Color.BLACK - Color.WHITE;
         } else {
-            return cornerValue * 40 + nextTurnValue * 50 + (nums.numOfWhite - nums.numOfBlack) * 10 + nextCells.length * 20;
+            return cornerValue * 100 + Color.WHITE - Color.BLACK;
         }
+    }
+
+    calcCornerValue(boadState, color) {
+        let value = 0;
+        if (boadState[0][0] === color) {
+            value++;
+        }
+        if (boadState[0][7] === color) {
+            value++;
+        }
+        if (boadState[7][0] === color) {
+            value++;
+        }
+        if (boadState[7][7] === color) {
+            value++;
+        }
+
+        return value;
     }
 
     // その他this.メソッド名で使えるもの(clientTemplateで宣言済)
@@ -113,8 +103,8 @@ export default class extends clientTemplate {
     //  {boolean} notOutOfBoard(x, y)
     // 石を置ける座標の配列を取得
     //  {Array} searchPuttableCellIndices(boadState, playerColor)
-    // 石を置いたあとの盤面を取得
-    //  {Array} putToBoard(boadState, x, y, playerColor)
+    // 石を置いたあとの盤面と次に置くべき石の色（なければnull）を取得
+    //  {boardState: boardState, nextColor: nextColor} putToBoard(boadState, x, y, playerColor)
     // 石の数を数える
     //  {numOfBlack: 黒の数, numberOfWhite: 白の数} count(boadState)
 }

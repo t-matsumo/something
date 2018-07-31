@@ -16,32 +16,9 @@ export default class extends clientTemplate {
         };
      */
     think(info) {
-        this.playerColor = info.playerColor;
-
-        // 評価値が最も高い座標を選択
-        let maxValue = this.calcValue(info.boadState, info.puttableIndices[0].x, info.puttableIndices[0].y, info.playerColor);
-        let selectedCell = info.puttableIndices[0];
-        for (let cell of info.puttableIndices) {
-            let tmp = this.calcValue(info.boadState, cell.x, cell.y, info.playerColor);
-            if (maxValue < tmp) {
-                maxValue = tmp;
-                selectedCell = cell;
-            }
-        }
         
-        return selectedCell;
-    }
-
-    // 評価関数
-    calcValue(boadState, x, y, color) {
-        let board = this.putToBoard(boadState, x, y, color);
-        let nums = this.count(board);
-
-        if (this.playerColor.id === Color.BLACK.id) {
-            return nums.numOfBlack - nums.numberOfWhite;
-        } else {
-            return nums.numberOfWhite - nums.numOfBlack;
-        }
+        
+        return super.think(info);
     }
 
     // その他this.メソッド名で使えるもの(clientTemplateで宣言済)
