@@ -1,5 +1,6 @@
-import Color from '../constants/Color.js';
+import Color from './constants/Color.js';
 import DirectionOffsets from './constants/DirectionOffsets.js';
+
 
 export default class {
     /**
@@ -20,26 +21,47 @@ export default class {
     }
 
     put(boadState, playerColor) {
-        let puttableIndices = this.searchPuttableCellIndices(boadState, playerColor);
-        
-        let count = this.count(boadState);
+        let boardStateForAi = new Array(8);
+        for (let x = 0; x < 8; x++) {
+            boardStateForAi[x] = new Array(8);
+            for (let y = 0; y < 8; y++) {
+                boardStateForAi[x][y] = this.convertIdToColor(boadState[x][y].id);
+            }
+        }
+        let playerColorForAi = this.convertIdToColor(playerColor.id);
+        let puttableIndices = this.searchPuttableCellIndices(boardStateForAi, playerColorForAi);
+        let count = this.count(boardStateForAi);
 
         let info = {
-            boadState: boadState,
+            boadState: boardStateForAi,
             puttableIndices: puttableIndices,
-            playerColor: playerColor,
+            playerColor: playerColorForAi,
             numOfBlack: count.numOfBlack,
             numOfWhite: count.numOfWhite
         };
+
+        console.dir(info);
+        alert();
         return this.think(info);
+    }
+
+    convertIdToColor(id) {
+        switch (id) {
+            case 'EMPTY':
+                return Color.EMPTY;
+            case 'BLACK':
+                return Color.BLACK;
+            case 'WHITE':
+                return Color.WHITE;
+        }
     }
 
     searchPuttableCellIndices(boadState, playerColor) {
         let indices = [];
-        for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-                if (this.checkPuttableOrNot(boadState, i, j, playerColor)) {
-                    indices.push({ x: i, y: j });
+        for (let x = 0; x < 8; x++) {
+            for (let y = 0; y < 8; y++) {
+                if (this.checkPuttableOrNot(boadState, x, y, playerColor)) {
+                    indices.push({ x: x, y: y });
                 }
             }
         }
@@ -48,7 +70,7 @@ export default class {
     }
 
     checkPuttableOrNot(boadState, x, y, playerColor) {
-        if (boadState[x][y].id !== Color.EMPTY.id) {
+        if (boadState[x][y] !== Color.EMPTY) {
             return false;
         }
 
@@ -62,18 +84,18 @@ export default class {
     }
 
     canReverse(boadState, x, y, playerColor, offset) {
-        let oppositColor = (playerColor.id === Color.BLACK.id) ? Color.WHITE : Color.BLACK;
+        let oppositColor = (playerColor === Color.BLACK) ? Color.WHITE : Color.BLACK;
         let count = 0; // 裏返せる個数（これがないと自分の色の石の隣に置けてしまう）
         x += offset.x;
         y += offset.y;
-        while (this.notOutOfBoard(x, y) && boadState[x][y].id === oppositColor.id) {
+        while (this.notOutOfBoard(x, y) && boadState[x][y] === oppositColor) {
             x += offset.x;
             y += offset.y;
 
             count++;
         }
 
-        if (count > 0 && this.notOutOfBoard(x, y) && boadState[x][y].id === playerColor.id) {
+        if (count > 0 && this.notOutOfBoard(x, y) && boadState[x][y] === playerColor) {
             return true;
         }
 
@@ -86,13 +108,13 @@ export default class {
 
     putToBoard(currentBoardState, x, y, playerColor) {
         let boardState = new Array(8);
-        for (let y = 0; y < 8; y++) {
-            boardState[y] = currentBoardState[y].slice();
+        for (let x = 0; x < 8; x++) {
+            boardState[x] = currentBoardState[x].slice();
         }
 
         boardState[x][y] = playerColor;
 
-        let oppositColor = (playerColor.id === Color.BLACK.id) ? Color.WHITE : Color.BLACK;
+        let oppositColor = (playerColor === Color.BLACK) ? Color.WHITE : Color.BLACK;
         for (let key in DirectionOffsets) {
             if (!this.canReverse(boardState, x, y, playerColor, DirectionOffsets[key])) {
                 continue;
@@ -100,7 +122,7 @@ export default class {
 
             let tempX = x + DirectionOffsets[key].x;
             let tempY = y + DirectionOffsets[key].y;
-            while (boardState[tempX][tempY].id === oppositColor.id) {
+            while (boardState[tempX][tempY] === oppositColor) {
                 boardState[tempX][tempY] = playerColor;
 
                 tempX += DirectionOffsets[key].x;
@@ -114,13 +136,13 @@ export default class {
     count(boardState) {
         let numOfBlack = 0;
         let numOfWhite = 0;
-        for (let row of boardState) {
-            for (let cell of row) {
-                switch (cell.id) {
-                    case Color.BLACK.id:
+        for (let x = 0; x < 8; x++) {
+            for (let y = 0; y < 8; y++) {
+                switch (boardState[x][y]) {
+                    case Color.BLACK:
                         numOfBlack++;
                         break;
-                    case Color.WHITE.id:
+                    case Color.WHITE:
                         numOfWhite++;
                         break;
                 }
