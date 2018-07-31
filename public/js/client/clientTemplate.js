@@ -130,7 +130,24 @@ export default class {
             }
         }
 
-        return boardState;
+        let nextColor = (playerColor === Color.BLACK) ? Color.WHITE : Color.BLACK;
+        for (let x = 0; x < 8; x++) {
+            for (let y = 0; y < 8; y++) {
+                if (this.checkPuttableOrNot(boardState, x, y, nextColor)) {
+                    return {boardState: boardState, nextColor: nextColor};
+                }
+            }
+        }
+
+        for (let x = 0; x < 8; x++) {
+            for (let y = 0; y < 8; y++) {
+                if (this.checkPuttableOrNot(boardState, x, y, playerColor)) {
+                    return {boardState: boardState, nextColor: playerColor};
+                }
+            }
+        }
+
+        return {boardState: boardState, nextColor: null};
     }
 
     count(boardState) {

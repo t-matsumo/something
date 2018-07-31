@@ -49,8 +49,8 @@ export default class extends clientTemplate {
     //  {boolean} notOutOfBoard(x, y)
     // 石を置ける座標の配列を取得
     //  {Array} searchPuttableCellIndices(boadState, playerColor)
-    // 石を置いたあとの盤面を取得
-    //  {Array} putToBoard(boadState, x, y, playerColor)
+    // 石を置いたあとの盤面と次に置くべき石の色（なければnull）を取得
+    //  {boardState: boardState, nextColor: nextColor} putToBoard(boadState, x, y, playerColor)
     // 石の数を数える
     //  {numOfBlack: 黒の数, numberOfWhite: 白の数} count(boadState)
 }
