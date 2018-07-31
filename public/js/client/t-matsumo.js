@@ -25,7 +25,7 @@ export default class extends clientTemplate {
         let maxValue = 0;
         let selectedCell = info.puttableIndices[0];
         for (let cell of info.puttableIndices) {
-            let tmp = this.calcValue(info.boadState, cell.x, cell.y, info.playerColor, maxDepth);
+            let tmp = this.calcValue(info.boadState, cell.x, cell.y, info.playerColor, maxDepth, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER);
             if (maxValue < tmp) {
                 maxValue = tmp;
                 selectedCell = cell;
@@ -36,35 +36,43 @@ export default class extends clientTemplate {
     }
 
     // 評価関数
-    calcValue(boadState, x, y, color, depth) {
-        if (depth < 1) {
-            return 0;
-        }
-
+    calcValue(boadState, x, y, color, depth, max, min) {
         let nextState = this.putToBoard(boadState, x, y, color);
         let count = this.count(nextState.boardState);
 
         let value = this.evaluateBoardState(boadState, count, color);
 
+        if (depth < 1) {
+            return value;
+        }
+
         let puttableIndices = this.searchPuttableCellIndices(nextState.boardState, nextState.nextColor);
         if (nextState.nextColor === this.playerColor) {
-            let maxValue = 0;
+            let maxValue = max;
             for (let cell of puttableIndices) {
-                let tmp = this.calcValue(nextState.boardState, cell.x, cell.y, nextState.nextColor, depth - 1);
+                let tmp = this.calcValue(nextState.boardState, cell.x, cell.y, nextState.nextColor, depth - 1, maxValue, min);
                 if (maxValue < tmp) {
                     maxValue = tmp;
                 }
+
+                if (maxValue >= min) {
+                    break;
+                }
             }
-            return value + maxValue;
+            return maxValue;
         } else if (nextState.nextColor === this.opponentColor) {
-            let minValue = 0;
+            let minValue = min;
             for (let cell of puttableIndices) {
-                let tmp = this.calcValue(nextState.boardState, cell.x, cell.y, nextState.nextColor, depth - 1);
+                let tmp = this.calcValue(nextState.boardState, cell.x, cell.y, nextState.nextColor, depth - 1, max, minValue);
                 if (minValue > tmp) {
                     minValue = tmp;
                 }
+
+                if (minValue <= max) {
+                    break;
+                }
             }
-            return value + minValue;
+            return minValue;
         }
 
         // nullのとき（終了）
@@ -73,10 +81,16 @@ export default class extends clientTemplate {
 
     evaluateBoardState(boadState, count, color) {
         let cornerValue = this.calcCornerValue(boadState, color);
+        let diffValue = this.calcDiffValue(count, color);
+        let edgeValue = this.calcEdgeValue(boadState, color);
+        return cornerValue * 100 + diffValue + edgeValue * 10;
+    }
+
+    calcDiffValue(count, color) {
         if (color === Color.BLACK) {
-            return cornerValue * 100 + Color.BLACK - Color.WHITE;
+            return Color.BLACK - Color.WHITE;
         } else {
-            return cornerValue * 100 + Color.WHITE - Color.BLACK;
+            return Color.WHITE - Color.BLACK;
         }
     }
 
@@ -93,6 +107,26 @@ export default class extends clientTemplate {
         }
         if (boadState[7][7] === color) {
             value++;
+        }
+
+        return value;
+    }
+
+    calcEdgeValue(boadState, color) {
+        let value = 0;
+        for (let i = 0; i < 8; i++) {
+            if (boadState[0][i] === color) {
+                value++;
+            }
+            if (boadState[i][7] === color) {
+                value++;
+            }
+            if (boadState[7][i] === color) {
+                value++;
+            }
+            if (boadState[i][7] === color) {
+                value++;
+            }
         }
 
         return value;

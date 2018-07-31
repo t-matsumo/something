@@ -16,9 +16,9 @@ export default class extends clientTemplate {
         };
      */
     think(info) {
-        
-        
-        return super.think(info);
+        let n = info.puttableIndices.length;
+        let index = Math.floor(Math.random() * n);
+        return info.puttableIndices[index];
     }
 
     // その他this.メソッド名で使えるもの(clientTemplateで宣言済)
